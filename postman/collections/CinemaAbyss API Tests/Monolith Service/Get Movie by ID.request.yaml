@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/api/movies?id={{movieId}}"
+method: GET
+queryParams:
+  id: "{{movieId}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Movie ID matches", function () {
+          var jsonData = pm.response.json();
+          pm.expect(jsonData.id).to.equal(parseInt(pm.collectionVariables.get("movieId")));
+      });
+    language: text/javascript
+order: 8000

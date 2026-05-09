@@ -1,0 +1,17 @@
+# Use this workspace to collaborate
+workspace:
+  id: ad9e6933-80bc-4d27-845c-dea45978f7c5
+
+localResources:
+  collections:
+    - ..\tests\postman\CinemaAbyss.postman_collection.json
+  environments:
+    - ..\tests\postman\docker.environment.json
+    - ..\tests\postman\kubernetes.environment.json
+    - ..\tests\postman\local.environment.json
+  specs:
+    - ..\api-specification.yaml
+
+cloudResources:
+  collections:
+    ..\postman\collections\CinemaAbyss API Tests: a1e35cf0-d187-4109-82a1-b4644720a53e

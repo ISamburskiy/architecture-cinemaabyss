@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/api/subscriptions?id={{subscriptionId}}"
+method: GET
+queryParams:
+  id: "{{subscriptionId}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Subscription ID matches", function () {
+          var jsonData = pm.response.json();
+          pm.expect(jsonData.id).to.equal(parseInt(pm.collectionVariables.get("subscriptionId")));
+      });
+    language: text/javascript
+order: 12000

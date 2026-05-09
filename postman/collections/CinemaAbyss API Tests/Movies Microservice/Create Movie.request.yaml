@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{moviesServiceUrl}}/api/movies"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+        "title": "Microservice Test Movie {{$randomInt}}",
+        "description": "A test movie created by automated tests for the microservice",
+        "genres": ["Sci-Fi", "Thriller"],
+        "rating": 4.8
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Response has id", function () {
+          var jsonData = pm.response.json();
+          pm.expect(jsonData.id).to.exist;
+          pm.collectionVariables.set("msMovieId", jsonData.id);
+      });
+    language: text/javascript
+order: 3000

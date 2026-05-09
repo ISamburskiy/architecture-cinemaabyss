@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+        "username": "testuser{{$randomInt}}",
+        "email": "testuser{{$randomInt}}@example.com"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Response has id", function () {
+          var jsonData = pm.response.json();
+          pm.expect(jsonData.id).to.exist;
+          pm.collectionVariables.set("userId", jsonData.id);
+      });
+    language: text/javascript
+order: 4000
