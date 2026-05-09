@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/api/payments"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+        "user_id": {{userId}},
+        "amount": 9.99
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Response has id", function () {
+          var jsonData = pm.response.json();
+          pm.expect(jsonData.id).to.exist;
+          pm.collectionVariables.set("paymentId", jsonData.id);
+      });
+    language: text/javascript
+order: 9000

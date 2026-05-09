@@ -1,0 +1,12 @@
+$kind: collection
+description: API tests for CinemaAbyss microservices architecture
+variables:
+  baseUrl: http://localhost:8080
+  moviesServiceUrl: http://localhost:8081
+  eventsServiceUrl: http://localhost:8082
+  proxyServiceUrl: http://localhost:8000
+  userId: ""
+  movieId: ""
+  msMovieId: ""
+  paymentId: ""
+  subscriptionId: ""

@@ -1,0 +1,10 @@
+name: Docker Environment
+values:
+  - key: baseUrl
+    value: 'http://monolith:8080'
+  - key: moviesServiceUrl
+    value: 'http://movies-service:8081'
+  - key: eventsServiceUrl
+    value: 'http://events-service:8082'
+  - key: proxyServiceUrl
+    value: 'http://proxy-service:8000'

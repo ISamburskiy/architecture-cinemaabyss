@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{eventsServiceUrl}}/api/events/movie"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+        "movie_id": {{movieId}},
+        "title": "Test Movie Event",
+        "action": "viewed",
+        "user_id": {{userId}}
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Response has status success", function () {
+          var jsonData = pm.response.json();
+          pm.expect(jsonData.status).to.equal("success");
+      });
+    language: text/javascript
+order: 2000
