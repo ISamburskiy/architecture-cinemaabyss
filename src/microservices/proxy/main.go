@@ -16,6 +16,7 @@ type Proxy struct {
 	monolithURL      string
 	moviesServiceURL string
 	migrationPercent int
+	eventsServiceURL string
 }
 
 func NewProxy() *Proxy {
@@ -31,6 +32,7 @@ func NewProxy() *Proxy {
         monolithURL:      getEnv("MONOLITH_URL", "http://localhost:8080"),
         moviesServiceURL: getEnv("MOVIES_SERVICE_URL", "http://localhost:8081"),
         migrationPercent:   percent,
+		eventsServiceURL: getEnv("EVENTS_SERVICE_URL", "http://localhost:8082"),
     }
 }
 
@@ -84,6 +86,42 @@ func (p *Proxy) handleMovies(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (p *Proxy) handleMonolithRequests(w http.ResponseWriter, r *http.Request) {
+	targetURL := p.monolithURL
+
+	proxyReq, err := http.NewRequest(r.Method, targetURL+r.URL.Path, r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for name, values := range r.Header {
+		for _, value := range values {
+			proxyReq.Header.Add(name, value)
+		}
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(proxyReq)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	defer resp.Body.Close()
+
+	for name, values := range resp.Header {
+		for _, value := range values {
+			w.Header().Add(name, value)
+		}
+	}
+
+	w.WriteHeader(resp.StatusCode)
+	_, err = io.Copy(w, resp.Body)
+	if err != nil {
+		fmt.Printf("Error copying response: %v\n", err)
+	}
+}
+
 func (p *Proxy) healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
@@ -101,9 +139,17 @@ func main() {
 
 	proxy := NewProxy()
 
+	//health
 	http.HandleFunc("/health", proxy.healthHandler)
+	// migrated movies endpoints
 	http.HandleFunc("/api/movies", proxy.handleMovies)
 	http.HandleFunc("/api/movies/", proxy.handleMovies)
+	// monolith only endpoints
+	http.HandleFunc("/api/users", proxy.handleMonolithRequests)
+	http.HandleFunc("/api/payments", proxy.handleMonolithRequests)
+	http.HandleFunc("/api/subscriptions", proxy.handleMonolithRequests)
+	// events tbd?
+
 
 	port := getEnv("PORT", "8000")
 	fmt.Printf("Proxy server starting on port %s (migration: %d%%)\n", port, proxy.migrationPercent)
