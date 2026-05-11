@@ -10,21 +10,22 @@ import (
 )
 
 func startMovieConsumer() {
-	startConsumer("movie-events")
+	startConsumer("movie-events", "movie-event-consumer")
 }
 
 func startUserConsumer() {
-	startConsumer("user-events")
+	startConsumer("user-events", "user-event-consumer")
 }
 
 func startPaymentConsumer() {
-	startConsumer("payment-events")
+	startConsumer("payment-events", "payment-event-consumer")
 }
 
-func startConsumer(topic string) {
+func startConsumer(topic, groupId string) {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:  []string{os.Getenv("KAFKA_BROKERS")},
 		Topic:    topic,
+		GroupID:  groupId,
 	})
 
 	for {

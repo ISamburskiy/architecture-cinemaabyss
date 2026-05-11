@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"fmt"
 	"io"
+	"encoding/json"
 )
 
 func movieHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,12 +37,22 @@ func handleRawEvent(w http.ResponseWriter, r *http.Request, topic string) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(fmt.Sprintf("Event sent to %s", topic)))
+
+	response := map[string]interface{}{
+		"status": "success",
+		"message": fmt.Sprintf("Event sent to %s", topic),
+		"topic":   topic,
+	}
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+	}
 }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("events-service healthy"))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]bool{"status": true})
 }
