@@ -115,7 +115,7 @@ jobs:
             type=sha,format=short
             type=ref,event=branch
             latest
-
+ 
       - name: Build and push Proxy Service Docker image
         uses: docker/build-push-action@v4
         with:
