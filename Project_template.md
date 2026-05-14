@@ -31,6 +31,8 @@
 
 
 # Задание 4
+Запуск helm
 ![alt text](image.png)
 
+Проверка апи movies после запуска helm
 ![alt text](image-1.png)
