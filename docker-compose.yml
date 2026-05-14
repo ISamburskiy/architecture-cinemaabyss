@@ -102,8 +102,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      kafka:  # ← исправлено: было kafka
-        condition: service_healthy  # ← ждёт статуса healthy
+      kafka:  
+        condition: service_healthy 
     ports:
       - "8082:8082"
     environment:

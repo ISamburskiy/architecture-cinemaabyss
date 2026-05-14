@@ -52,8 +52,13 @@ func (p *Proxy) handleMovies(w http.ResponseWriter, r *http.Request) {
 	if p.shouldRouteToMoviesService() {
 		targetURL = p.moviesServiceURL
 	}
+	targetURLWithPath := targetURL+r.URL.Path
+	if r.URL.RawQuery != "" {
+    	targetURLWithPath += "?" + r.URL.RawQuery
+	}
 
-	proxyReq, err := http.NewRequest(r.Method, targetURL+r.URL.Path, r.Body)
+
+	proxyReq, err := http.NewRequest(r.Method, targetURLWithPath, r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -88,8 +93,12 @@ func (p *Proxy) handleMovies(w http.ResponseWriter, r *http.Request) {
 
 func (p *Proxy) handleMonolithRequests(w http.ResponseWriter, r *http.Request) {
 	targetURL := p.monolithURL
+	targetURLWithPath := targetURL+r.URL.Path
+	if r.URL.RawQuery != "" {
+    	targetURLWithPath += "?" + r.URL.RawQuery
+	}
 
-	proxyReq, err := http.NewRequest(r.Method, targetURL+r.URL.Path, r.Body)
+	proxyReq, err := http.NewRequest(r.Method, targetURLWithPath, r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
