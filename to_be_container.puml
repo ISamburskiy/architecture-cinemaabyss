@@ -1,0 +1,66 @@
+@startuml container_dia
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
+
+skinparam linetype ortho
+skinparam ArrowColor Black
+skinparam ArrowThickness 2
+skinparam nodesep 90
+
+
+
+title Container Diagram for Cinemaabyss TO BE
+
+Person(User, "User", "Cinemaabyss user")
+
+System_Ext(extRecom, "External recomendation platfrom")
+System_Ext(extPayment, "External payment system", "Executes payments")
+System_Ext(extStreaming, "External streaming platforms", "Provides content")
+System_Ext(S3, "Amazon S3", "Cloud storage service")
+
+System_Boundary(userInterface, "UserInterface") {
+    Container(WebApp, "Web application", "Allows users to interact with the system")
+    Container(MobileApp, "Mobile application", "Allows users to interact with the system on mobile devices")
+    Container(SmartTVapp, "Smart TV application", "Allows users to interact with the system on smart TVs")
+}
+
+Container(proxy, "Proxy / API Gateway", "Handles requests from user interfaces and communicates with core")
+
+System_Boundary(coreSystem, "Core System") {
+    Container(userService, "User Service", "Manages user information and subscriptions")
+    Container(movieService, "Movie Service", "Manages movie information and user preferences")
+    Container(paymentService, "Payment Service", "Handles payment processing and communication with external payment system")
+    Container(streamingService, "Streaming Service", "Establishes user connections with external streaming platforms")
+    Container(recomendationService, "Recomendation Service", "Communicates with external recomendation platfrom")
+    Container(kafka, "Kafka broker")
+}
+
+System_Boundary(DB, "Database") {
+    Container(moviesDB, "Movies Database", "Stores movie information")
+    Container(usersDB, "Users Database", "Stores user information and subscriptions")
+}
+
+MobileApp-[hidden]up-WebApp
+SmartTVapp-[hidden]up-MobileApp
+DB-[hidden]down-coreSystem
+'''
+User-right->userInterface:Uses
+userInterface-[hidden]right-proxy
+Rel(userInterface, proxy, "HTTPS")
+proxy-right->coreSystem
+'''
+userService-up->usersDB:"Stores data, PGX"
+movieService-up->moviesDB:"Stores data, PGX"
+'''
+userService<-down->kafka:"Post subscription events, get payment events, MQ"
+movieService-down->kafka:"Post movie view, movie rate events; get recomendation data events, MQ"
+recomendationService-up->kafka:"Post recomendation data, get movie view, movie rate, MQ"
+paymentService-left->kafka:"Payment events, MQ"
+'''
+streamingService-[hidden]left-userService
+'''
+paymentService-->extPayment:"Executes payments"
+recomendationService-down->extRecom:"Gets recomendation data"
+streamingService-right->extStreaming:"Establishes connection"
+coreSystem-->S3:"Stores data"
+
+@enduml
